@@ -1,3 +1,4 @@
+using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -16,7 +17,8 @@ public class Knight : MonoBehaviour
     public float t;
     public AnimationCurve ac;
     public AudioClip[] footsteps;
-    public AudioSource footstepSource;
+    AudioSource footstepSource;
+    public CinemachineImpulseSource impulseSource;
 
     // Start is called before the first frame update
     void Start()
@@ -69,12 +71,6 @@ public class Knight : MonoBehaviour
         { 
             transform.position += transform.right * direction * speed * Time.deltaTime;
         }
-
-        if (animator.GetFloat("speed") != 0)
-        {
-            int randomNumber = Random.Range(0, footsteps.Length);
-            footstepSource.PlayOneShot(footsteps[randomNumber]);
-        }
     }
     public void AttackHasFinished()
     {
@@ -83,6 +79,12 @@ public class Knight : MonoBehaviour
     public void AttackChain()
     {
         combo += 1;
+    }
+    public void PlayFootStep()
+    {
+        int randomNumber = Random.Range(0, footsteps.Length);
+        footstepSource.PlayOneShot(footsteps[randomNumber]);
+        impulseSource.GenerateImpulse();
     }
 
     IEnumerator Jump()
@@ -96,13 +98,5 @@ public class Knight : MonoBehaviour
             yield return null;
         }
         isInAir = false;
-    }
-
-    IEnumerator FootSteps()
-    {
-        
-
-        
-        yield return null;
     }
 }
