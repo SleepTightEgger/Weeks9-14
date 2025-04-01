@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
-public class Knight : MonoBehaviour
+public class Knight1 : MonoBehaviour
 {
     public float speed = 2;
     Animator animator;
@@ -19,6 +20,10 @@ public class Knight : MonoBehaviour
     public AudioClip[] footsteps;
     AudioSource footstepSource;
     public CinemachineImpulseSource impulseSource;
+
+    public Tilemap tilemap;
+    public Tile grass;
+    public Tile stone;
 
     // Start is called before the first frame update
     void Start()
@@ -36,23 +41,21 @@ public class Knight : MonoBehaviour
 
         animator.SetFloat("speed", Mathf.Abs(direction));
 
-        if (Input.GetMouseButtonDown(0) && !isAttacking)
+        if (Input.GetMouseButtonDown(0) )
         {
-            if (combo == 0)
+            Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+            Vector3Int gridPos = tilemap.WorldToCell(mousePos);
+
+            Vector3 start = transform.position;
+
+            if (tilemap.GetTile(gridPos) == stone)
             {
-                animator.SetTrigger("attack");
-                isAttacking = true;
+                StartCoroutine(ClickToMove(start, gridPos));
             }
-            else if (combo == 1)
+            else
             {
-                animator.SetTrigger("attack2");
-                isAttacking = true;
-            }
-            else if (combo == 2)
-            {
-                animator.SetTrigger("attack3");
-                isAttacking = true;
-                combo = 0;
+                Debug.Log("Clicked Grass");
             }
         }
 
@@ -95,5 +98,18 @@ public class Knight : MonoBehaviour
             yield return null;
         }
         isInAir = false;
+    }
+
+    IEnumerator ClickToMove(Vector3 start, Vector3Int gridPos)
+    {
+        t = 0;
+        while (t < 1)
+        {
+            float direction = gridPos.x - start.x;
+            t += Time.deltaTime;
+            transform.position += Vector3.Lerp(start, gridPos, 1) * direction * speed * Time.deltaTime;
+            animator.SetFloat("speed", Mathf.Abs(direction));
+            yield return null;
+        }
     }
 }
